@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>MainPage.qml</file>
+        <file>HomePage.qml</file>
+        <file>GTabBar.qml</file>
+    </qresource>
+</RCC>

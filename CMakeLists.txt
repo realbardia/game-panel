@@ -16,7 +16,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(PROJECT_SOURCES
         main.cpp
-        qml.qrc
+        src/ui/qml.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -29,6 +29,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/sources/gsteamgamesource.h src/sources/gsteamgamesource.cpp
         src/types/ggamedetailsitem.h src/types/ggamedetailsitem.cpp
         src/sources/ggamesourcemanager.h src/sources/ggamesourcemanager.cpp
+        src/tools/acfparser.h src/tools/acfparser.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET GamePanel APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

@@ -1,5 +1,6 @@
 #define GGAMESOURCE_CONFIG_HEADER QStringLiteral("GGameSourceConfig")
 #define GGAMESOURCE_CONFIG_VERSION 1
+#define GGAMESOURCE_CONFIG_PATH QString(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + '/' + mStoreFileName + ".json")
 
 #include "ggamesourcemanager.h"
 #include "gsteamgamesource.h"
@@ -8,9 +9,17 @@
 #include <QDataStream>
 #include <QIODevice>
 
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QFile>
+#include <QStandardPaths>
+#include <QDir>
+
 GGameSourceManager::GGameSourceManager(QObject *parent)
     : QObject{parent}
 {
+    QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
 }
 
 GGameSourceManager::~GGameSourceManager()
@@ -55,32 +64,53 @@ bool GGameSourceManager::addSource(GGameSourceManager::SourceType type, const QS
     return true;
 }
 
-QString GGameSourceManager::saveConfigs() const
+bool GGameSourceManager::saveConfigs() const
 {
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::WriteOnly);
-    stream << GGAMESOURCE_CONFIG_HEADER;
-    stream << GGAMESOURCE_CONFIG_VERSION;
-
-    stream << (int)mSources.size();
+    QJsonArray sources;
     for (const auto &item: mSources)
     {
-        stream << (int)item.type;
-        stream << item.name;
-        stream << item.path;
+        QJsonObject obj;
+        obj["type"] = (int)item.type;
+        obj["name"] = item.name;
+        obj["path"] = item.path;
+
+        sources << obj;
     }
 
-    return QString::fromUtf8(data.toBase64());
+    QJsonObject root;
+    root["header"] = GGAMESOURCE_CONFIG_HEADER;
+    root["version"] = GGAMESOURCE_CONFIG_VERSION;
+    root["sources"] = sources;
+
+    const auto storePath = GGAMESOURCE_CONFIG_PATH;
+    QFile f(storePath);
+    if (!f.open(QFile::WriteOnly))
+        return false;
+
+    f.write( QJsonDocument(root).toJson() );
+    f.close();
+    return true;
 }
 
-bool GGameSourceManager::restoreConfigs(const QString &configs)
+bool GGameSourceManager::restoreConfigs()
 {
-    const auto data = QByteArray::fromBase64(configs.toUtf8());
-    QDataStream stream(data);
+    const auto storePath = GGAMESOURCE_CONFIG_PATH;
+    QFile f(storePath);
+    if (!f.open(QFile::ReadOnly))
+        return false;
 
-    QString header;
-    stream >> header;
-    if (header != GGAMESOURCE_CONFIG_HEADER)
+    QJsonParseError error;
+    const auto document = QJsonDocument::fromJson(f.readAll(), &error);
+    f.close();
+
+    if (error.error != QJsonParseError::NoError)
+    {
+        qDebug() << error.errorString();
+        return false;
+    }
+
+    const auto root = document.object();
+    if (root.value("header").toString() != GGAMESOURCE_CONFIG_HEADER)
     {
         qDebug() << "GGameSourceManager::restoreConfigs: invalid header";
         return false;
@@ -88,26 +118,18 @@ bool GGameSourceManager::restoreConfigs(const QString &configs)
 
     mSources.clear();
 
-    int version;
-    stream >> version;
-    switch (version)
+    switch (root.value("version").toInt())
     {
     case 1:
     {
-        int size;
-        stream >> size;
-        while (size > 0)
+        for (const auto v: root.value("sources").toArray())
         {
-            int type;
-            QString name;
-            QString path;
-
-            stream >> type;
-            stream >> name;
-            stream >> path;
+            const auto obj = v.toObject();
+            const auto type = obj.value("type").toInt();
+            const auto name = obj.value("name").toString();
+            const auto path = obj.value("path").toString();
 
             addSource(static_cast<SourceType>(type), name, path);
-            size--;
         }
     }
         break;
@@ -127,4 +149,18 @@ void GGameSourceManager::reloadRequest()
         mGamesCacheList << item.source->games();
 
     Q_EMIT gamesChanged();
+}
+
+QString GGameSourceManager::storeFileName() const
+{
+    return mStoreFileName;
+}
+
+void GGameSourceManager::setStoreFileName(const QString &newStoreFileName)
+{
+    if (mStoreFileName == newStoreFileName)
+        return;
+    mStoreFileName = newStoreFileName;
+    restoreConfigs();
+    Q_EMIT storeFileNameChanged();
 }

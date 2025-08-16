@@ -13,6 +13,7 @@ class GGameSourceManager : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<GGameDetailsItem> games READ games NOTIFY gamesChanged FINAL)
+    Q_PROPERTY(QString storeFileName READ storeFileName WRITE setStoreFileName NOTIFY storeFileNameChanged FINAL)
 
 public:
     enum SourceType {
@@ -25,14 +26,18 @@ public:
 
     QQmlListProperty<GGameDetailsItem> games();
 
+    QString storeFileName() const;
+    void setStoreFileName(const QString &newStoreFileName);
+
 public Q_SLOTS:
     bool addSource(SourceType type, const QString &name, const QString &path);
 
-    QString saveConfigs() const;
-    bool restoreConfigs(const QString &configs);
+    bool saveConfigs() const;
+    bool restoreConfigs();
 
 Q_SIGNALS:
     void gamesChanged();
+    void storeFileNameChanged();
 
 protected:
     void reloadRequest();
@@ -47,6 +52,8 @@ private:
 
     QMap<QString, SourceItem> mSources;
     QList<GGameDetailsItem*> mGamesCacheList;
+
+    QString mStoreFileName;
 };
 
 #endif // GGAMESOURCEMANAGER_H
