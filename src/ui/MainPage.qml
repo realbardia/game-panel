@@ -31,5 +31,13 @@ Page {
         anchors.left: tabBar.right
         anchors.right: parent.right
         games: sourceManager.games
+        scale: 1 - tabBar.ratio*0.03
+    }
+
+    Rectangle {
+        z: 100
+        anchors.fill: parent
+        color: "#000"
+        opacity: tabBar.ratio * 0.3
     }
 }

@@ -4,5 +4,18 @@
         <file>MainPage.qml</file>
         <file>HomePage.qml</file>
         <file>GTabBar.qml</file>
+        <file>components/GTextField.qml</file>
+        <file>MaterialIcons/materialdesignicons-webfont.ttf</file>
+        <file>MaterialIcons/MaterialIcons-Regular.ttf</file>
+        <file>MaterialIcons/MaterialIcons.qml</file>
+        <file>MaterialIcons/qmldir</file>
+        <file>components/GButton.qml</file>
+        <file>components/ComponentsGlobals.qml</file>
+        <file>components/qmldir</file>
+        <file>components/GIconOnlyButton.qml</file>
+        <file>components/GProfileButton.qml</file>
+        <file>components/GMaterialIcon.qml</file>
+        <file>components/GLabel.qml</file>
+        <file>components/GItemDelegate.qml</file>
     </qresource>
 </RCC>

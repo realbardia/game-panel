@@ -5,6 +5,9 @@ import QtQuick.Layouts 1.3
 
 import GamePanel 1.0
 
+import "components"
+import "MaterialIcons"
+
 Page {
     id: page
 
@@ -15,18 +18,38 @@ Page {
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 64
+            Layout.preferredHeight: 60
             // TODO: Move all constant variable to a global qml file
 
             RowLayout {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: 10
+                spacing: 0
 
-                TextField {
+                GTextField {
                     Layout.preferredWidth: 200
-                    placeholderText: qsTr("Search")
+                    placeholder: qsTr("Search")
+                    icon: MaterialIcons.mdi_magnify
                 }
 
-                Button {
-                    text: "T"
+                Item {
+                    Layout.preferredHeight: 1
+                    Layout.fillWidth: true
+                }
+
+                GIconOnlyButton {
+                    text: MaterialIcons.mdi_heart_outline
+                }
+
+                GIconOnlyButton {
+                    text: MaterialIcons.mdi_basket
+                }
+
+                GProfileButton {
+                    materialIcon: MaterialIcons.mdi_account
+                    username: "Bardia"
                 }
             }
         }
